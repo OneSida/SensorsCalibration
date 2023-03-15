@@ -51,3 +51,8 @@ add_executable(run_extrinsic_calib src/run_extrinsic_calib.cpp)
 target_link_libraries(run_extrinsic_calib ${PROJECT_NAME})
 target_link_libraries(run_extrinsic_calib utils)
 target_link_libraries(run_extrinsic_calib ceres)
+
+add_executable(run_camera_pnp src/run_camera_pnp.cpp)
+target_link_libraries(run_camera_pnp ${PROJECT_NAME})
+target_link_libraries(run_camera_pnp utils)
+target_link_libraries(run_camera_pnp ceres)
