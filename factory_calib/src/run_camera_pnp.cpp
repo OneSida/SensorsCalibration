@@ -37,7 +37,7 @@ void solveSingle(const std::string &jpg_prefix,
       pts2d.emplace_back({detections[i].p[j].first, detections[i].p[j].second});
     }
   }
-  std::vector<float> rvec, tvec;
+  std::vector<float> rvec(3), tvec(3);
   solveCamPnP(obj_pts, pts2d, intrinsic, dist, rvec, tvec);
   std::cout << "\n[rvec]\n";
   for (size_t i = 0; i < rvec.size(); ++i) {
