@@ -123,7 +123,10 @@ double reprojectionError(const Eigen::Matrix3d &K,
                          const Eigen::Matrix3d &R, const Eigen::Vector3d &t);
 
 bool solveLidarPnP(std::vector< std::vector<float> >& objpoints,  std::vector< std::vector<float> >& lidarpoints, 
-	  std::vector<float>& rvec, std::vector<float>& tvec);
+	std::vector<float>& rvec, std::vector<float>& tvec);
 
 bool solveCamPnP(std::vector< std::vector<float> >& objpoints,  std::vector< std::vector<float> >& imgpoints, 
-	 std::vector< std::vector<double> >& camera_intrinsic,  std::vector<double>& dist_coeffs, std::vector<float>& rvec, std::vector<float>& tvec);
+	std::vector< std::vector<double> >& camera_intrinsic,  std::vector<double>& dist_coeffs, std::vector<float>& rvec, std::vector<float>& tvec);
+
+bool solveCamPnP(std::vector< std::vector<float> >& objpoints,  std::vector< std::vector<float> >& imgpoints, 
+	std::vector<double>& camera_intrinsic,  std::vector<double>& dist_coeffs, std::vector<float>& rvec, std::vector<float>& tvec);

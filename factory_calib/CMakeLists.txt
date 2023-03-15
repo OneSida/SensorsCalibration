@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(CornerDetect)
 
-set(CMAKE_BUILD_TYPE "Debug") # Release
+set(CMAKE_BUILD_TYPE "Release")
 set(CMAKE_CXX_FLAGS "-std=gnu++14 -g -Wall")
 
 set(3RDPARTY_DIR ${CMAKE_SOURCE_DIR}/3rdparty)
