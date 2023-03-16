@@ -49,7 +49,7 @@ int32_t solveSingle(const std::string &jpg_prefix,
     });
 
   std::vector<float> rvec(3);
-  std::vector<float> tvec = {0, 0, 1};
+  std::vector<float> tvec(3);
   solveCamPnP(obj_pts, pts2d, intrinsic, dist, rvec, tvec);
   std::cout << "\n[rvec]\n";
   for (size_t i = 0; i < rvec.size(); ++i) {
