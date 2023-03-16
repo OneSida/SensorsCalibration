@@ -634,7 +634,7 @@ struct ZCostFunctorPnPv2
 
 		residual[0] = u - u_img;
 		residual[1] = v - v_img;
-        // std::cout<<"residual: "<<residual[0]<<','<<residual[1]<<std::endl;
+        std::cout<<"residual: "<<residual[0]<<','<<residual[1]<<std::endl;
 
 		return true;
 	}
