@@ -555,9 +555,9 @@ struct ZCostFunctorPnPv2
 	std::vector<float> image_point_;
 	std::vector<double> K_;
 	std::vector<double> D_;
-    double *tra_;
-	ZCostFunctorPnPv2( std::vector<float> objpoint,  std::vector<float> imgpoint,  std::vector<double> camera_intrinsic,  std::vector<double> dist_coeffs,double *tra):
-		object_point_(objpoint), image_point_(imgpoint), K_(camera_intrinsic), D_(dist_coeffs),tra_(tra){}
+	ZCostFunctorPnPv2( std::vector<float> objpoint,  std::vector<float> imgpoint,  std::vector<double> camera_intrinsic,  std::vector<double> dist_coeffs):
+		object_point_(objpoint), image_point_(imgpoint), K_(camera_intrinsic), D_(dist_coeffs){
+}
 
 	template<typename T>
 	bool operator()(const T* const rot, const T* const tra, T* residual) const
@@ -572,19 +572,19 @@ struct ZCostFunctorPnPv2
         T rx=rot[0]/theta;
         T ry=rot[1]/theta;
         T rz=rot[2]/theta;
-        Eigen::Matrix<T,4,4> extrin;
+       	Eigen::Matrix<T,4,4> extrin;
         extrin(0,0)=T(0.0);
         extrin(0,1)=sin(theta)*(-rz);
         extrin(0,2)=sin(theta)*(ry);
-        extrin(0,3)=T(tra_[0]);
+        extrin(0,3)=T(tra[0]);
         extrin(1,0)=sin(theta)*(rz);
         extrin(1,1)=T(0.0);
         extrin(1,2)=sin(theta)*(-rx);
-        extrin(1,3)=T(tra_[1]);
+        extrin(1,3)=T(tra[1]);
         extrin(2,0)=sin(theta)*(-ry);
         extrin(2,1)=sin(theta)*(rx);
         extrin(2,2)=T(0.0);
-        extrin(2,3)=T(tra_[2]);
+        extrin(2,3)=T(tra[2]);
         extrin(3,0)=T(0.0);
         extrin(3,1)=T(0.0);
         extrin(3,2)=T(0.0);
@@ -599,14 +599,14 @@ struct ZCostFunctorPnPv2
                 extrin(i,j)+=rr(i,j);
         for(int i=0;i<3;i++)
             extrin(i,i)+=cos(theta);
-        extrin=extrin.inverse().eval();
+	extrin=extrin.inverse().eval();
         Eigen::Matrix<T,4,1> pt_in;
         pt_in(0,0)=point_in[0];
         pt_in(1,0)=point_in[1];
         pt_in(2,0)=point_in[2];
         pt_in(3,0)=T(1.0);
         Eigen::Matrix<T,4,1> pt_out=extrin*pt_in;
-        point_out[0]=pt_out(0,0);
+	point_out[0]=pt_out(0,0);
         point_out[1]=pt_out(1,0);
         point_out[2]=pt_out(2,0);
 		
@@ -627,23 +627,23 @@ struct ZCostFunctorPnPv2
         T d = sqrt(point_out[0]*point_out[0] + point_out[1]*point_out[1] + point_out[2]*point_out[2]);
         T factor = K_[0] * d + point_out[2];
         T u = K_[1] * x / factor + K_[3];
-        T v = K_[2] * x / factor + K_[4];
+        T v = K_[2] * y / factor + K_[4];
         
 		T u_img = T(image_point_[0]);
 		T v_img = T(image_point_[1]);
 
 		residual[0] = u - u_img;
 		residual[1] = v - v_img;
-        std::cout<<"residual: "<<residual[0]<<','<<residual[1]<<std::endl;
+        // std::cout<<"residual: "<<residual[0]<<','<<residual[1]<<std::endl;
 
 		return true;
 	}
 
 	static ceres::CostFunction* create( std::vector<float> objpoint, 
-		 std::vector<float> imgpoint,  std::vector<double> camera_intrinsic,  std::vector<double> dist_coeffs,double *tra)
+		 std::vector<float> imgpoint,  std::vector<double> camera_intrinsic,  std::vector<double> dist_coeffs)
 	{
 		return new ceres::AutoDiffCostFunction<ZCostFunctorPnPv2, 2, 3, 3>
-			(new ZCostFunctorPnPv2(objpoint, imgpoint, camera_intrinsic, dist_coeffs,tra));
+			(new ZCostFunctorPnPv2(objpoint, imgpoint, camera_intrinsic, dist_coeffs));
 	}
 };
 
@@ -733,15 +733,18 @@ bool solveCamPnP(std::vector< std::vector<float> >& objpoints,  std::vector< std
 	ceres::Problem problem;
 	for (int i = 0; i < imgpoints.size(); i++)
 	{
-		ceres::CostFunction* cost = ZCostFunctorPnPv2::create(objpoints[i], imgpoints[i], camera_intrinsic, dist_coeffs, tra);
+		ceres::CostFunction* cost = ZCostFunctorPnPv2::create(objpoints[i], imgpoints[i], camera_intrinsic, dist_coeffs);
 		problem.AddResidualBlock(cost, nullptr, rot, tra);
 	}
 
 	ceres::Solver::Options options;
 	options.linear_solver_type = ceres::DENSE_SCHUR;
-	options.max_num_iterations = 80;
+	options.max_num_iterations = 1000;
 	options.trust_region_strategy_type = ceres::LEVENBERG_MARQUARDT;
 	options.minimizer_progress_to_stdout = false;
+	// options.logging_type = ceres::SILENT;
+	options.function_tolerance = 1e-10;
+	options.parameter_tolerance = 1e-10;
 
 	ceres::Solver::Summary summary;
 	ceres::Solve(options, &problem, &summary);
